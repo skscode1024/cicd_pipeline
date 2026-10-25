@@ -1,0 +1,86 @@
+name: Python CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  code-scan:
+    name: Code Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install scanner
+        run: pip install ruff
+
+      - name: Check code
+        run: ruff check .
+
+  test:
+    name: Test Stage
+    needs: code-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install app and test packages
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run tests
+        run: pytest
+
+  build:
+    name: Build Stage
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Create app package
+        run: |
+          mkdir -p dist
+          python -m zipfile -c dist/python-app.zip main.py requirements.txt
+
+      - name: Save package
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-app
+          path: dist/python-app.zip
+
+  deploy:
+    name: Deploy Code
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Download app package
+        uses: actions/download-artifact@v4
+        with:
+          name: python-app
+          path: dist
+
+      - name: Check package
+        run: ls -l dist
+
+      - name: Deploy
+        run: echo "Replace this with your cloud provider deployment command"
