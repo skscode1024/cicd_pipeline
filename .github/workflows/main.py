@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Get the project file
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Set up python
         uses: actions/setup-python@v5
