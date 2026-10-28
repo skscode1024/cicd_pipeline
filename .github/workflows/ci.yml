@@ -82,5 +82,5 @@ jobs:
       - name: Check package
         run: ls -l dist
 
-      - name: Deploy
+      - name: Deploy to AWS EKS
         run: echo "Replace this with your cloud provider deployment command"
