@@ -28,7 +28,7 @@ jobs:
         run: ruff check .
 
   test:
-    name: Test Stage
+    name: This is Test Stage
     needs: code-scan
     runs-on: ubuntu-latest
     steps:
